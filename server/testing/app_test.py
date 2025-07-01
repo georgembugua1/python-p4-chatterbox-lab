@@ -84,12 +84,18 @@ class TestApp:
             db.session.delete(h)
             db.session.commit()
 
+    def ensure_message_exists(self):
+        # Always create a new message in the current session/context
+        m = Message(body="Hello 👋", username="Liza")
+        db.session.add(m)
+        db.session.commit()
+        return m
 
     def test_updates_body_of_message_in_database(self):
         '''updates the body of a message in the database.'''
         with app.app_context():
 
-            m = Message.query.first()
+            m = self.ensure_message_exists()
             id = m.id
             body = m.body
 
@@ -111,7 +117,7 @@ class TestApp:
         '''returns data for the updated message as JSON.'''
         with app.app_context():
 
-            m = Message.query.first()
+            m = self.ensure_message_exists()
             id = m.id
             body = m.body
 
@@ -145,5 +151,5 @@ class TestApp:
                 f'/messages/{hello_from_liza.id}'
             )
 
-            h = Message.query.filter_by(body="Hello 👋").first()
+            h = Message.query.filter_by(id=hello_from_liza.id).first()
             assert(not h)
